@@ -19,8 +19,7 @@ class UsersHandler {
   
     return h.response({
       status: 'success',
-      message: 'Pengguna berhasil dibuat',
-      data: { id: user.id },
+      message: 'Pengguna berhasil dibuat'
     }).code(201);
   };
   
@@ -33,7 +32,14 @@ class UsersHandler {
     }
   
     const token = jwt.sign({ id: user.id }, 'your-secret', { expiresIn: '1h' });
-    return h.response({ message: 'success', token }).code(200);
+    return h.response({ 
+      message: 'success', 
+      loginResult: {
+        userId: user.id,
+        name: user.name,
+        token,
+      }
+    }).code(200);
   };
   
   getUserByIdHandler = (request, h) => {

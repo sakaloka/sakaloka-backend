@@ -23,10 +23,19 @@ class DestinationsHandler {
   postDestinationHandler = (request, h) => {
     const { name, cityId, latitude, longitude, description } = request.payload;
     if (!name || !cityId) {
-      return h.response({ status: 'fail', message: 'Data tidak lengkap' }).code(400);
+      return h.response({ status: 'fail', message: 'Nama Destinasi, Kota, dan Lokasi tidak boleh kosong' }).code(400);
     }
     const newDest = this._service.addDestination({ name, cityId, latitude, longitude, description });
-    return h.response({ status: 'success', data: { id: newDest.id } }).code(201);
+    return h.response({ 
+      status: 'success', 
+      data: { 
+        id: newDest.id,
+        cityId: newDest.city_id,
+        latitude: newDest.latitude,
+        longitude: newDest.longitude,
+        description: newDest.description,
+      } 
+    }).code(201);
   };
 
   putDestinationHandler = (request, h) => {

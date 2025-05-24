@@ -25,17 +25,35 @@ class ReviewsHandler {
     }
 
     const newReview = this._service.addReview({ comment, rating, userId, eventId, destinationId: null });
-    return h.response({ status: 'success', data: { id: newReview.id } }).code(201);
+    return h.response({ 
+      status: 'success', 
+      data: { 
+        id: newReview.id,
+        userId: newReview.userId,
+        eventId: newReview.eventId,
+        rating: newReview.rating,
+        comment: newReview.comment
+      } 
+    }).code(201);
   };
 
   postDestinationReviewHandler = (request, h) => {
     const { comment, rating, userId, destinationId } = request.payload;
     if (!rating || !userId || !destinationId) {
-      return h.response({ status: 'fail', message: 'Data tidak lengkap' }).code(400);
+      return h.response({ status: 'fail', message: 'Penilaian dan Destinasi tidak boleh kosong' }).code(400);
     }
 
     const newReview = this._service.addReview({ comment, rating, userId, destinationId, eventId: null });
-    return h.response({ status: 'success', data: { id: newReview.id } }).code(201);
+    return h.response({ 
+      status: 'success', 
+      data: { 
+        id: newReview.id,
+        userId: newReview.userId,
+        destinationId: newReview.destinationId,
+        rating: newReview.rating,
+        comment: newReview.comment
+      } 
+    }).code(201);
   };
 
   putReviewHandler = (request, h) => {
@@ -43,7 +61,10 @@ class ReviewsHandler {
     if (!updated) {
       return h.response({ status: 'fail', message: 'Review tidak ditemukan' }).code(404);
     }
-    return { status: 'success', message: 'Review berhasil diperbarui' };
+    return { 
+      status: 'success', 
+      message: 'Review berhasil diperbarui' 
+    };
   };
 
   deleteReviewHandler = (request, h) => {
