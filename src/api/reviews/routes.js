@@ -6,12 +6,22 @@ const routes = (handler) => [
   },
   {
     method: 'POST',
-    path: '/reviews',
-    handler: handler.postReviewHandler,
+    path: '/reviews/events',
+    handler: handler.postEventReviewHandler,
+  },
+  {
+    method: 'POST',
+    path: '/reviews/destinations',
+    handler: handler.postDestinationReviewHandler,
   },
   {
     method: 'PUT',
-    path: '/reviews/{id}',
+    path: '/reviews/events/{id}',
+    handler: handler.putReviewHandler,
+  },
+  {
+    method: 'PUT',
+    path: '/reviews/destinations/{id}',
     handler: handler.putReviewHandler,
   },
   {

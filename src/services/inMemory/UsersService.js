@@ -1,6 +1,15 @@
 class UsersService {
   constructor() {
-    this._users = [];
+    this._users = [
+      {
+        id: 1,
+        email: 'test@example.com',
+        password: '123456',
+        name: 'Rifa',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ];
   }
 
   addUser = ({ email, password, name }) => {

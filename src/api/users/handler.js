@@ -29,11 +29,11 @@ class UsersHandler {
     const user = this._service.findUserByEmailAndPassword(email, password);
   
     if (!user) {
-      return h.response({ status: 'fail', message: 'Email atau kata sandi salah' }).code(401);
+      return h.response({ error: 'fail', message: 'Email atau kata sandi salah' }).code(401);
     }
   
     const token = jwt.sign({ id: user.id }, 'your-secret', { expiresIn: '1h' });
-    return h.response({ status: 'success', token }).code(200);
+    return h.response({ message: 'success', token }).code(200);
   };
   
   getUserByIdHandler = (request, h) => {

@@ -3,6 +3,15 @@ class ReviewsService {
     this._reviews = [];
   }
   getAllReviews = () => this._reviews;
+
+  getReviewsByTypeAndTarget = (type, id) => {
+    if (type === 'event') {
+      return this._reviews.filter(r => r.eventId === id);
+    } else if (type === 'destination') {
+      return this._reviews.filter(r => r.destinationId === id);
+    }
+    return [];
+  };
   
   addReview = ({ comment, rating, userId, destinationId, eventId }) => {
     const id = this._reviews.length + 1;
