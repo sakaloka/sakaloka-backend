@@ -8,8 +8,6 @@ import events from './api/events/index.js';
 import EventsService from './services/inMemory/EventsService.js';
 import reviews from './api/reviews/index.js';
 import ReviewsService from './services/inMemory/ReviewsService.js';
-import posts from './api/posts/index.js';
-import PostsService from './services/inMemory/PostsService.js';
 
 
 const init = async () => {
@@ -17,7 +15,6 @@ const init = async () => {
   const destinationsService = new DestinationsService(); 
   const eventsService = new EventsService(); 
   const reviewsService = new ReviewsService(); 
-  const postsService = new PostsService(); 
 
   const server = Hapi.server({
     port: 9000,
@@ -53,12 +50,6 @@ const init = async () => {
       plugin: reviews,
       options: {
         service: reviewsService,
-      },
-    },
-    {
-      plugin: posts,
-      options: {
-        service: postsService,
       },
     },
   ]);

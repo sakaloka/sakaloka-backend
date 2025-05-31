@@ -4,6 +4,26 @@ class ReviewsService {
   }
   getAllReviews = () => this._reviews;
 
+  getRatingStats = (type, id) => {
+    let filtered = [];
+  
+    if (type === 'event') {
+      filtered = this._reviews.filter(r => r.eventId === id);
+    } else if (type === 'destination') {
+      filtered = this._reviews.filter(r => r.destinationId === id);
+    }
+  
+    const totalReviews = filtered.length;
+    if (totalReviews === 0) {
+      return { averageRating: 0, totalReviews: 0 };
+    }
+  
+    const totalRating = filtered.reduce((acc, r) => acc + r.rating, 0);
+    const averageRating = totalRating / totalReviews;
+  
+    return { averageRating, totalReviews };
+  };
+  
   getReviewsByTypeAndTarget = (type, id) => {
     if (type === 'event') {
       return this._reviews.filter(r => r.eventId === id);
@@ -13,6 +33,10 @@ class ReviewsService {
     return [];
   };
   
+  getReviewsByUser = (userId) => {
+    return this._reviews.filter(r => r.userId === parseInt(userId));
+  }
+
   addReview = ({ comment, rating, userId, destinationId, eventId }) => {
     const id = this._reviews.length + 1;
     const timestamp = new Date().toISOString();

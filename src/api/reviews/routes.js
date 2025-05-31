@@ -5,6 +5,16 @@ const routes = (handler) => [
     handler: handler.getReviewsHandler,
   },
   {
+    method: 'GET',
+    path: '/reviews/user',
+    handler: handler.getReviewsByUserHandler,
+  },  
+  {
+    method: 'GET',
+    path: '/reviews/{type}/{id}/stats',
+    handler: handler.getRatingStatsHandler,
+  },  
+  {
     method: 'POST',
     path: '/reviews/events',
     handler: handler.postEventReviewHandler,
