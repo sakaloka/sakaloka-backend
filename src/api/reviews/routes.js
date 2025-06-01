@@ -3,6 +3,7 @@ const routes = (handler) => [
     method: 'GET',
     path: '/reviews',
     handler: handler.getReviewsHandler,
+    options: { auth: false },
   },
   {
     method: 'GET',
