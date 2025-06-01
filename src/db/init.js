@@ -71,4 +71,21 @@ db.exec(`
     FOREIGN KEY (destination_id) REFERENCES destinations(id),
     FOREIGN KEY (event_id) REFERENCES events(id)
   );
+
+  CREATE TABLE IF NOT EXISTS predicted_reviews (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id          INTEGER,
+    destination_id   INTEGER,
+    predicted_rating INTEGER CHECK(predicted_rating BETWEEN 1 AND 5),
+    FOREIGN KEY (destination_id) REFERENCES destinations(id)
+  );
+  
+  CREATE TABLE IF NOT EXISTS destination_photos (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    destination_id INTEGER NOT NULL,
+    photo_url      TEXT NOT NULL,
+    is_gallery     INTEGER DEFAULT 1, 
+    position       INTEGER,           
+    FOREIGN KEY (destination_id) REFERENCES destinations(id)
+  );
 `);

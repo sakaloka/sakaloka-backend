@@ -23,7 +23,13 @@
   },
   "dependencies": {
     "@hapi/hapi": "^21.4.0",
+    "axios": "^1.9.0",
     "better-sqlite3": "^11.10.0",
-    "hapi-auth-jwt2": "^11.0.0"
+    "csv-parser": "^3.2.0",
+    "dotenv": "^16.5.0",
+    "hapi-auth-jwt2": "^11.0.0",
+    "moment-timezone": "^0.6.0",
+    "p-limit": "^6.2.0",
+    "sqlite3": "^5.1.7"
   }
 }
