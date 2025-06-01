@@ -1,47 +1,65 @@
+import db from '../../db/database.js';
+
 class ReviewsService {
-  constructor() {
-    this._reviews = [];
-  }
-  getAllReviews = () => this._reviews;
+  getAllReviews = () => {
+    const stmt = db.prepare(`SELECT * FROM reviews`);
+    return stmt.all();
+  };
 
   getRatingStats = (type, id) => {
-    let filtered = [];
-  
+    let stmt;
+
     if (type === 'event') {
-      filtered = this._reviews.filter(r => r.eventId === id);
+      stmt = db.prepare(`SELECT rating FROM reviews WHERE event_id = ?`);
     } else if (type === 'destination') {
-      filtered = this._reviews.filter(r => r.destinationId === id);
+      stmt = db.prepare(`SELECT rating FROM reviews WHERE destination_id = ?`);
+    } else {
+      return { averageRating: 0, totalReviews: 0 };
     }
-  
-    const totalReviews = filtered.length;
+
+    const ratings = stmt.all(id);
+    const totalReviews = ratings.length;
+
     if (totalReviews === 0) {
       return { averageRating: 0, totalReviews: 0 };
     }
-  
-    const totalRating = filtered.reduce((acc, r) => acc + r.rating, 0);
+
+    const totalRating = ratings.reduce((sum, r) => sum + r.rating, 0);
     const averageRating = totalRating / totalReviews;
-  
+
     return { averageRating, totalReviews };
   };
-  
+
   getReviewsByTypeAndTarget = (type, id) => {
+    let stmt;
     if (type === 'event') {
-      return this._reviews.filter(r => r.eventId === id);
+      stmt = db.prepare(`SELECT * FROM reviews WHERE event_id = ?`);
     } else if (type === 'destination') {
-      return this._reviews.filter(r => r.destinationId === id);
+      stmt = db.prepare(`SELECT * FROM reviews WHERE destination_id = ?`);
+    } else {
+      return [];
     }
-    return [];
+
+    return stmt.all(id);
   };
-  
+
   getReviewsByUser = (userId) => {
-    return this._reviews.filter(r => r.userId === parseInt(userId));
-  }
+    const stmt = db.prepare(`SELECT * FROM reviews WHERE user_id = ?`);
+    return stmt.all(userId);
+  };
 
   addReview = ({ comment, rating, userId, destinationId, eventId }) => {
-    const id = this._reviews.length + 1;
     const timestamp = new Date().toISOString();
-    const review = {
-      id,
+
+    const stmt = db.prepare(`
+      INSERT INTO reviews (comment, rating, user_id, destination_id, event_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const result = stmt.run(comment, rating, userId, destinationId, eventId, timestamp, timestamp);
+
+    return {
+      id: result.lastInsertRowid,
       comment,
       rating,
       userId,
@@ -50,30 +68,23 @@ class ReviewsService {
       created_at: timestamp,
       updated_at: timestamp,
     };
-    this._reviews.push(review);
-    return review;
   };
-  
+
   updateReview = (id, { comment, rating }) => {
-    const index = this._reviews.findIndex(r => r.id === parseInt(id));
-    if (index === -1) return false;
-  
-    const updated_at = new Date().toISOString();
-    this._reviews[index] = {
-      ...this._reviews[index],
-      comment,
-      rating,
-      updated_at,
-    };
-  
-    return true;
+    const timestamp = new Date().toISOString();
+
+    const stmt = db.prepare(`
+      UPDATE reviews SET comment = ?, rating = ?, updated_at = ? WHERE id = ?
+    `);
+
+    const result = stmt.run(comment, rating, timestamp, id);
+    return result.changes > 0;
   };
-  
+
   deleteReview = (id) => {
-    const index = this._reviews.findIndex(r => r.id === parseInt(id));
-    if (index === -1) return false;
-    this._reviews.splice(index, 1);
-    return true;
+    const stmt = db.prepare(`DELETE FROM reviews WHERE id = ?`);
+    const result = stmt.run(id);
+    return result.changes > 0;
   };
 }
 

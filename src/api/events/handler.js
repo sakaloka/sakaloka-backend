@@ -21,22 +21,28 @@ class EventsHandler {
   };
 
   postEventHandler = (request, h) => {
-    const { title, description, startDate, endDate } = request.payload;
+    const { title, description, startDate, endDate, location, category, detail_url } = request.payload;
+    
     if (!title || !startDate || !endDate) {
       return h.response({ status: 'fail', message: 'Data tidak lengkap' }).code(400);
     }
-    const newEvent = this._service.addEvent({ title, description, startDate, endDate });
+  
+    const newEvent = this._service.addEvent({ title, description, startDate, endDate, location, category, detail_url });
+  
     return h.response({ 
       status: 'success', 
-      data: { 
+      data: {
         id: newEvent.id,
         title: newEvent.title,
         description: newEvent.description,
         startDate: newEvent.start_date,
         endDate: newEvent.end_date,
+        location: newEvent.location,
+        category: newEvent.category,
+        detail_url: newEvent.detail_url
       } 
     }).code(201);
-  };
+  };  
 
   putEventHandler = (request, h) => {
     const updated = this._service.updateEvent(request.params.id, request.payload);
