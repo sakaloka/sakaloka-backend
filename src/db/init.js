@@ -88,4 +88,17 @@ db.exec(`
     position       INTEGER,           
     FOREIGN KEY (destination_id) REFERENCES destinations(id)
   );
+
+  CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+  );
+
+  CREATE TABLE IF NOT EXISTS destination_categories (
+    destination_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    PRIMARY KEY (destination_id, category_id),
+    FOREIGN KEY (destination_id) REFERENCES destinations(id),
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+  );
 `);

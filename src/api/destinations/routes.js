@@ -20,6 +20,12 @@ const routes = (handler) => [
     path: '/destinations/{id}', 
     handler: handler.deleteDestinationHandler 
   },
+  {
+    method: 'GET',
+    path: '/destinations/recommend',
+    handler: handler.getRecommendedHandler,
+    options: { auth: false }, 
+  },
 ];
 
 export default routes;

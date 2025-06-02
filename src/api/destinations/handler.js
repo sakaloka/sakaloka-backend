@@ -7,6 +7,9 @@ class DestinationsHandler {
     this.postDestinationHandler = this.postDestinationHandler.bind(this);
     this.putDestinationHandler = this.putDestinationHandler.bind(this);
     this.deleteDestinationHandler = this.deleteDestinationHandler.bind(this);
+
+    // Machine Learning
+    this.getRecommendedHandler = this.getRecommendedHandler.bind(this);
   }
 
   getDestinationsHandler = (request, h) => ({
@@ -49,6 +52,22 @@ class DestinationsHandler {
     if (!deleted) return h.response({ status: 'fail', message: 'Destinasi tidak ditemukan' }).code(404);
     return { status: 'success', message: 'Destinasi berhasil dihapus' };
   };
+
+  async getRecommendedHandler(request, h) {
+    const { q = '', n = 5 } = request.query;
+
+    if (!q.trim()) {
+      return h.response({ status: 'fail', message: 'Query tidak boleh kosong' }).code(400);
+    }
+
+    try {
+      const data = await this._service.getTopRecommendations(q, n);
+      return { status: 'success', data };
+    } catch (err) {
+      console.error(err);
+      return h.response({ status: 'error', message: 'Gagal mengambil rekomendasi' }).code(500);
+    }
+  }
 }
 
 export default DestinationsHandler;

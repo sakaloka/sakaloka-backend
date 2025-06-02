@@ -11,7 +11,7 @@ const { OPENCAGE_KEY } = process.env;
 if (!OPENCAGE_KEY) throw new Error('OPENCAGE_KEY not found in .env');
 
 const CSV_PATH = '../manual-dest.csv';
-const limit = pLimit(1); // limit 1 geocode request at a time
+const limit = pLimit(1); 
 
 /* ------- helper DB ------- */
 function getOrInsertCity(cityName) {

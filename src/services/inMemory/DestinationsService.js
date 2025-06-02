@@ -1,4 +1,7 @@
 import db from '../../db/database.js';
+import axios from 'axios';
+
+const ML_BASE_URL = 'http://127.0.0.1:8000'; 
 
 class DestinationsService {
   getAllDestinations = () => {
@@ -55,6 +58,46 @@ class DestinationsService {
     const stmt = db.prepare('DELETE FROM destinations WHERE id = ?');
     const result = stmt.run(id);
     return result.changes > 0;
+  };
+
+  getDestinationByName = (name) => {
+    return db.prepare(`
+      SELECT d.*, c.name AS city, GROUP_CONCAT(cat.name, ', ') AS categories,
+        (SELECT photo_url
+          FROM destination_photos
+          WHERE destination_id = d.id
+          AND is_gallery = 0
+          LIMIT 1) AS main_photo
+      FROM destinations d
+      JOIN cities c ON d.city_id = c.id
+      JOIN destination_categories dc ON dc.destination_id = d.id
+      JOIN categories cat ON cat.id = dc.category_id
+      WHERE d.name = ? LIMIT 1
+    `).get(name);
+  };
+
+  getTopRecommendations = async (query, topN = 5) => {
+    const { data } = await axios.post(`${ML_BASE_URL}/recommend/`, {
+      query,
+      top_n: topN,
+    });
+
+    const detailed = data.recommendations.map((rec) => {
+      const dest = this.getDestinationByName(rec.place_name);
+      if (!dest) return null; 
+      return {
+        id          : dest.id,
+        name        : dest.name,
+        city        : dest.city,
+        categories    : dest.categories,
+        latitude    : dest.latitude,
+        longitude   : dest.longitude,
+        description : dest.description,
+        main_photo  : dest.main_photo,
+      };
+    }).filter(Boolean);       
+
+    return detailed;
   };
 }
 
