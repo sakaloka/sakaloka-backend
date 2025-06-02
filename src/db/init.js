@@ -54,8 +54,8 @@ db.exec(`
     end_date TEXT NOT NULL,
     description TEXT,
     detail_url TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT DEFAULT (datetime('now'))
+    created_at TEXT,
+    updated_at TEXT
   );
 
   CREATE TABLE IF NOT EXISTS reviews (

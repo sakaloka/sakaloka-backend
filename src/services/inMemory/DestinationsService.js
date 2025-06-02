@@ -1,5 +1,6 @@
 import db from '../../db/database.js';
 import axios from 'axios';
+import moment from 'moment-timezone'
 
 const ML_BASE_URL = 'http://127.0.0.1:8000'; 
 
@@ -15,7 +16,7 @@ class DestinationsService {
   };
 
   addDestination = ({ name, cityId, latitude, longitude, description }) => {
-    const timestamp = new Date().toISOString();
+    const timestamp = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
     const stmt = db.prepare(`
       INSERT INTO destinations (name, city_id, latitude, longitude, description, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -35,7 +36,7 @@ class DestinationsService {
   };
 
   updateDestination = (id, data) => {
-    const timestamp = new Date().toISOString();
+    const timestamp = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
     const stmt = db.prepare(`
       UPDATE destinations
       SET name = ?, city_id = ?, latitude = ?, longitude = ?, description = ?, updated_at = ?
@@ -89,11 +90,12 @@ class DestinationsService {
         id          : dest.id,
         name        : dest.name,
         city        : dest.city,
-        categories    : dest.categories,
+        categories  : dest.categories,
         latitude    : dest.latitude,
         longitude   : dest.longitude,
         description : dest.description,
         main_photo  : dest.main_photo,
+        similarity  : rec.similarity_score,
       };
     }).filter(Boolean);       
 
