@@ -77,7 +77,29 @@ class DestinationsService {
     `).get(name);
   };
 
-  getTopRecommendations = async (query, topN = 5) => {
+  getTopDestinations = async () => {
+    const stmt = db.prepare(`
+      SELECT d.id, d.name, c.name AS city, dp.photo_url, AVG(pr.predicted_rating) AS rating
+      FROM destinations d
+      JOIN cities c ON d.city_id = c.id
+      JOIN destination_photos dp ON d.id = dp.destination_id
+      JOIN predicted_reviews pr ON pr.destination_id = d.id
+      WHERE dp.is_gallery = 0
+        AND d.id IN (
+          SELECT destination_id
+          FROM predicted_reviews
+          GROUP BY destination_id
+          ORDER BY AVG(predicted_rating) DESC
+          LIMIT 5
+        )
+      GROUP BY d.id, d.name, c.name, dp.photo_url
+      ORDER BY rating DESC
+    `);
+  
+    return stmt.all();
+  }   
+
+  getRecommendationsByCategories = async (query, topN = 5) => {
     const { data } = await axios.post(`${ML_BASE_URL}/recommend/`, {
       query,
       top_n: topN,

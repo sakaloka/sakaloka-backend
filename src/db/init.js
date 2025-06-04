@@ -75,7 +75,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS predicted_reviews (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id          INTEGER,
-    destination_id   INTEGER,
+    destination_id   INTEGER NOT NULL,
     predicted_rating INTEGER CHECK(predicted_rating BETWEEN 1 AND 5),
     FOREIGN KEY (destination_id) REFERENCES destinations(id)
   );
