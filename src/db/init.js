@@ -2,12 +2,7 @@ import db from './database.js';
 
 if (process.argv.includes('--reset')) {
   db.exec(`
-    DROP TABLE IF EXISTS reviews;
-    DROP TABLE IF EXISTS destinations;
-    DROP TABLE IF EXISTS events;
-    DROP TABLE IF EXISTS cities;
-    DROP TABLE IF EXISTS provinces;
-    DROP TABLE IF EXISTS users;
+    DROP TABLE IF EXISTS user_preferences;
   `); 
 }
 
@@ -92,6 +87,12 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE
+  );
+
+  CREATE TABLE user_preferences (
+    user_id INTEGER PRIMARY KEY,
+    preferences TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
   );
 
   CREATE TABLE IF NOT EXISTS destination_categories (

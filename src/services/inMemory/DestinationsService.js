@@ -77,6 +77,26 @@ class DestinationsService {
     `).get(name);
   };
 
+  // Categories
+  getCategories = () => {
+    const stmt = db.prepare(`
+      SELECT *
+      FROM categories
+    `);
+    return stmt.all(); 
+  };  
+
+  postUserPreferences = ({ userId, preferences }) => {
+    const stmt = db.prepare(`
+      INSERT INTO user_preferences (user_id, preferences)
+      VALUES (?, ?)
+    `);
+  
+    const result = stmt.run(userId, preferences);
+    return result.changes;
+  };  
+
+  // Top
   getTopDestinations = async () => {
     const stmt = db.prepare(`
       SELECT d.id, d.name, c.name AS city, dp.photo_url, AVG(pr.predicted_rating) AS rating
@@ -99,10 +119,17 @@ class DestinationsService {
     return stmt.all();
   }   
 
-  getRecommendationsByCategories = async (query, topN = 5) => {
+  getRecommendationsByPreferences = async (id) => {
+    const result = db.prepare(`
+      SELECT preferences 
+      FROM user_preferences 
+      WHERE user_id = ? 
+    `).get(id);
+    
+    const preferences = result?.preferences;
     const { data } = await axios.post(`${ML_BASE_URL}/recommend/`, {
-      query,
-      top_n: topN,
+      query: preferences,
+      top_n: 5,
     });
 
     const detailed = data.recommendations.map((rec) => {
