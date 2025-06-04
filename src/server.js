@@ -8,15 +8,12 @@ import events from './api/events/index.js';
 import EventsService from './services/inMemory/EventsService.js';
 import reviews from './api/reviews/index.js';
 import ReviewsService from './services/inMemory/ReviewsService.js';
-import predictedReviews from './api/predicted-reviews/index.js';
-import PredictedReviewsService from './services/inMemory/PredictedReviewsService.js';
 
 const init = async () => {
   const usersService = new UsersService(); 
   const destinationsService = new DestinationsService(); 
   const eventsService = new EventsService(); 
   const reviewsService = new ReviewsService(); 
-  const predictedReviewService = new PredictedReviewsService();
 
   const server = Hapi.server({
     port: 9000,
@@ -53,12 +50,6 @@ const init = async () => {
       options: {
         service: reviewsService,
       },
-    },
-    {
-      plugin: predictedReviews,
-      options: {
-        service: predictedReviewService,
-      }
     },
   ]);
 
