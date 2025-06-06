@@ -2,11 +2,11 @@
     { 
       method: 'GET', 
       path: '/destinations', 
-      handler: handler.getDestinationsHandler 
+      handler: handler.getDestinationsHandler,
     },
     { method: 'GET', 
       path: '/destinations/{id}', 
-      handler: handler.getDestinationByIdHandler 
+      handler: handler.getDestinationByIdHandler,
     },
     { method: 'POST', 
       path: '/destinations', 

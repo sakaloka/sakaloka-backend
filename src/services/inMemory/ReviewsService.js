@@ -1,23 +1,22 @@
 import db from '../../db/database.js';
 
 class ReviewsService {
-  getAllReviews = () => {
-    const stmt = db.prepare(`SELECT * FROM reviews`);
-    return stmt.all();
+  getAllReviews = async () => {
+    const [rows] = await db.execute(`SELECT * FROM reviews`);
+    return rows;
   };
 
-  getRatingStats = (type, id) => {
-    let stmt;
-
+  getRatingStats = async (type, id) => {
+    let query = '';
     if (type === 'event') {
-      stmt = db.prepare(`SELECT rating FROM reviews WHERE event_id = ?`);
+      query = `SELECT rating FROM reviews WHERE event_id = ?`;
     } else if (type === 'destination') {
-      stmt = db.prepare(`SELECT rating FROM reviews WHERE destination_id = ?`);
+      query = `SELECT rating FROM reviews WHERE destination_id = ?`;
     } else {
       return { averageRating: 0, totalReviews: 0 };
     }
 
-    const ratings = stmt.all(id);
+    const [ratings] = await db.execute(query, [id]);
     const totalReviews = ratings.length;
 
     if (totalReviews === 0) {
@@ -30,61 +29,60 @@ class ReviewsService {
     return { averageRating, totalReviews };
   };
 
-  getReviewsByTypeAndTarget = (type, id) => {
-    let stmt;
+  getReviewsByTypeAndTarget = async (type, id) => {
+    let query = '';
     if (type === 'event') {
-      stmt = db.prepare(`SELECT * FROM reviews WHERE event_id = ?`);
+      query = `SELECT * FROM reviews WHERE event_id = ?`;
     } else if (type === 'destination') {
-      stmt = db.prepare(`SELECT * FROM reviews WHERE destination_id = ?`);
+      query = `SELECT * FROM reviews WHERE destination_id = ?`;
     } else {
       return [];
     }
 
-    return stmt.all(id);
+    const [rows] = await db.execute(query, [id]);
+    return rows;
   };
 
-  getReviewsByUser = (userId) => {
-    const stmt = db.prepare(`SELECT * FROM reviews WHERE user_id = ?`);
-    return stmt.all(userId);
+  getReviewsByUser = async (userId) => {
+    const [rows] = await db.execute(`SELECT * FROM reviews WHERE user_id = ?`, [userId]);
+    return rows;
   };
 
-  addReview = ({ comment, rating, userId, destinationId, eventId }) => {
-    const timestamp = new Date().toISOString();
+  addReview = async ({ comment, rating, userId, destinationId, eventId }) => {
+    const now = new Date();
 
-    const stmt = db.prepare(`
+    const [result] = await db.execute(`
       INSERT INTO reviews (comment, rating, user_id, destination_id, event_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const result = stmt.run(comment, rating, userId, destinationId, eventId, timestamp, timestamp);
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [comment, rating, userId, destinationId, eventId, now, now]
+    );
 
     return {
-      id: result.lastInsertRowid,
+      id: result.insertId,
       comment,
       rating,
       userId,
       destinationId,
       eventId,
-      created_at: timestamp,
-      updated_at: timestamp,
+      created_at: now,
+      updated_at: now,
     };
   };
 
-  updateReview = (id, { comment, rating }) => {
-    const timestamp = new Date().toISOString();
+  updateReview = async (id, { comment, rating }) => {
+    const now = new Date();
 
-    const stmt = db.prepare(`
-      UPDATE reviews SET comment = ?, rating = ?, updated_at = ? WHERE id = ?
-    `);
+    const [result] = await db.execute(
+      `UPDATE reviews SET comment = ?, rating = ?, updated_at = ? WHERE id = ?`,
+      [comment, rating, now, id]
+    );
 
-    const result = stmt.run(comment, rating, timestamp, id);
-    return result.changes > 0;
+    return result.affectedRows > 0;
   };
 
-  deleteReview = (id) => {
-    const stmt = db.prepare(`DELETE FROM reviews WHERE id = ?`);
-    const result = stmt.run(id);
-    return result.changes > 0;
+  deleteReview = async (id) => {
+    const [result] = await db.execute(`DELETE FROM reviews WHERE id = ?`, [id]);
+    return result.affectedRows > 0;
   };
 }
 

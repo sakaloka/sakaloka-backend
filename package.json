@@ -24,12 +24,15 @@
   "dependencies": {
     "@hapi/hapi": "^21.4.0",
     "axios": "^1.9.0",
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^11.10.0",
     "csv-parser": "^3.2.0",
     "dotenv": "^16.5.0",
     "hapi-auth-jwt2": "^11.0.0",
     "moment-timezone": "^0.6.0",
+    "mysql2": "^3.14.1",
     "p-limit": "^6.2.0",
+    "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7"
   }
 }

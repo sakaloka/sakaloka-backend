@@ -16,18 +16,32 @@ class DestinationsHandler {
     this.getRecommendationsByPreferencesHandler = this.getRecommendationsByPreferencesHandler.bind(this);
   }
 
-  getDestinationsHandler = (request, h) => {
-    const data = this._service.getAllDestinations();
-    if (!data) return h.response({ status: 'fail', message: 'Destinasi tidak ditemukan' }).code(404);
-    return { status: 'success', data };
-  };
+  getDestinationsHandler = async (request, h) => {
+    try {
+      const data = await this._service.getAllDestinations();
+      if (!data || data.length === 0) {
+        return h.response({ status: 'fail', message: 'Destinasi tidak ditemukan' }).code(404);
+      }
+      return { status: 'success', data };
+    } catch (err) {
+      console.error(err);
+      return h.response({ status: 'error', message: 'Gagal mengambil destinasi' }).code(500);
+    }
+  };  
 
   // Category
-  getCategoriesHandler = (request, h) => {
-    const data = this._service.getCategories();
-    if (!data) return h.response({ status: 'fail', message: 'Kategori tidak ditemukan'}).code(404);
-    return { status: 'success', data };
-  }
+  getCategoriesHandler = async (request, h) => {
+    try {
+      const data = await this._service.getCategories();
+      if (!data || data.length === 0) {
+        return h.response({ status: 'fail', message: 'Kategori tidak ditemukan' }).code(404);
+      }
+      return { status: 'success', data };
+    } catch (err) {
+      console.error(err);
+      return h.response({ status: 'error', message: 'Gagal mengambil kategori' }).code(500);
+    }
+  };  
 
   postUserPreferencesHandler = (request, h) => {
     const { userId, preferences } = request.payload;
@@ -60,11 +74,18 @@ class DestinationsHandler {
     }
   };  
 
-  getDestinationByIdHandler = (request, h) => {
-    const data = this._service.getDestinationById(request.params.id);
-    if (!data) return h.response({ status: 'fail', message: 'Destinasi tidak ditemukan' }).code(404);
-    return { status: 'success', data };
-  };
+  getDestinationByIdHandler = async (request, h) => {
+    try {
+      const data = await this._service.getDestinationById(request.params.id);
+      if (!data) {
+        return h.response({ status: 'fail', message: 'Destinasi tidak ditemukan' }).code(404);
+      }
+      return { status: 'success', data };
+    } catch (err) {
+      console.error(err);
+      return h.response({ status: 'error', message: 'Gagal mengambil destinasi' }).code(500);
+    }
+  };  
 
   postDestinationHandler = (request, h) => {
     const { name, cityId, latitude, longitude, description } = request.payload;

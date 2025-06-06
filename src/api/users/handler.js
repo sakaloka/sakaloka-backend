@@ -1,4 +1,6 @@
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 class UsersHandler {
   constructor(service) {
@@ -9,67 +11,77 @@ class UsersHandler {
     this.getUserByIdHandler = this.getUserByIdHandler.bind(this);
     this.putUserHandler = this.putUserHandler.bind(this);
   }
-  postUserHandler = (request, h) => {
+
+  postUserHandler = async (request, h) => {
     const { email, password, name } = request.payload;
+
     if (!email || !password || !name) {
       return h.response({ status: 'fail', message: 'Data tidak lengkap' }).code(400);
     }
-  
-    const user = this._service.addUser({ email, password, name });
-  
+
+    try {
+      const user = await this._service.addUser({ email, password, name });
+      return h.response({
+        status: 'success',
+        message: 'Pengguna berhasil dibuat',
+        data: user,
+      }).code(201);
+    } catch (err) {
+      const isDuplicate = err.message.includes('Email sudah digunakan');
+      return h
+        .response({ status: 'fail', message: isDuplicate ? err.message : 'Terjadi kesalahan server' })
+        .code(isDuplicate ? 409 : 500);
+    }
+  };
+
+  loginUserHandler = async (request, h) => {
+    const { email, password } = request.payload;
+
+    const user = await this._service.findUserByEmailAndPassword(email, password);
+    if (!user) {
+      return h.response({ status: 'fail', message: 'Email atau kata sandi salah' }).code(401);
+    }
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
     return h.response({
       status: 'success',
-      message: 'Pengguna berhasil dibuat'
-    }).code(201);
-  };
-  
-  loginUserHandler = (request, h) => {
-    const { email, password } = request.payload;
-    const user = this._service.findUserByEmailAndPassword(email, password);
-  
-    if (!user) {
-      return h.response({ error: 'fail', message: 'Email atau kata sandi salah' }).code(401);
-    }
-  
-    const token = jwt.sign({ id: user.id }, 'your-secret', { expiresIn: '1h' });
-    return h.response({ 
-      message: 'success', 
-      loginResult: {
+      message: 'Berhasil login',
+      data: {
         userId: user.id,
         name: user.name,
         token,
-      }
+      },
     }).code(200);
   };
-  
-  getUserByIdHandler = (request, h) => {
+
+  getUserByIdHandler = async (request, h) => {
     const { id } = request.params;
-    const user = this._service.findUserById(id);
-  
+
+    const user = await this._service.findUserById(id);
     if (!user) {
       return h.response({ status: 'fail', message: 'Pengguna tidak ditemukan' }).code(404);
     }
-  
+
     return {
       status: 'success',
       data: user,
     };
   };
-  
-  putUserHandler = (request, h) => {
+
+  putUserHandler = async (request, h) => {
     const { id } = request.params;
     const { name } = request.payload;
-  
+
     if (!name) {
       return h.response({ status: 'fail', message: 'Nama wajib diisi' }).code(400);
     }
-  
-    const updatedUser = this._service.updateUserById(id, { name });
-  
+
+    const updatedUser = await this._service.updateUserById(id, { name });
+
     if (!updatedUser) {
       return h.response({ status: 'fail', message: 'Pengguna tidak ditemukan' }).code(404);
     }
-  
+
     return {
       status: 'success',
       message: 'Pengguna berhasil diperbarui',

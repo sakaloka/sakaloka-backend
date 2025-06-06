@@ -1,52 +1,64 @@
+import bcrypt from 'bcrypt';
 import db from '../../db/database.js';
+import moment from 'moment-timezone';
 
 class UsersService {
-  addUser = ({ email, password, name }) => {
-    const timestamp = new Date().toISOString();
+  addUser = async ({ email, password, name }) => {
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const now = moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
 
-    const stmt = db.prepare(`
-      INSERT INTO users (email, password, name, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?)
-    `);
+      const [result] = await db.execute(
+        `INSERT INTO users (email, password, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)`,
+        [email, hashedPassword, name, now, now]
+      );
 
-    const result = stmt.run(email, password, name, timestamp, timestamp);
-
-    return {
-      id: result.lastInsertRowid,
-      email,
-      password,
-      name,
-      created_at: timestamp,
-      updated_at: timestamp,
-    };
+      return {
+        id: result.insertId,
+        email,
+        name,
+        created_at: now,
+        updated_at: now,
+      };
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new Error('Email sudah digunakan');
+      }
+      throw error;
+    }
   };
 
-  findUserByEmailAndPassword = (email, password) => {
-    const stmt = db.prepare(`
-      SELECT * FROM users WHERE email = ? AND password = ?
-    `);
-    return stmt.get(email, password);
+  findUserByEmailAndPassword = async (email, password) => {
+    const [rows] = await db.execute(`SELECT * FROM users WHERE email = ?`, [email]);
+    const user = rows[0];
+    if (!user) return null;
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return null;
+
+    delete user.password;
+    return user;
   };
 
-  findUserById = (id) => {
-    const stmt = db.prepare(`
-      SELECT * FROM users WHERE id = ?
-    `);
-    return stmt.get(id);
+  findUserById = async (id) => {
+    const [rows] = await db.execute(`SELECT * FROM users WHERE id = ?`, [id]);
+    const user = rows[0];
+    if (!user) return null;
+
+    delete user.password;
+    return user;
   };
 
-  updateUserById = (id, { name }) => {
-    const timestamp = new Date().toISOString();
+  updateUserById = async (id, { name }) => {
+    const now = moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
 
-    const stmt = db.prepare(`
-      UPDATE users SET name = ?, updated_at = ? WHERE id = ?
-    `);
+    const [result] = await db.execute(
+      `UPDATE users SET name = ?, updated_at = ? WHERE id = ?`,
+      [name, now, id]
+    );
 
-    const result = stmt.run(name, timestamp, id);
-    if (result.changes === 0) return null;
-
-    const updatedUser = this.findUserById(id);
-    return updatedUser;
+    if (result.affectedRows === 0) return null;
+    return this.findUserById(id);
   };
 }
 

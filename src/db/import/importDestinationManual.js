@@ -11,7 +11,7 @@ dotenv.config();
 const { OPENCAGE_KEY } = process.env;
 if (!OPENCAGE_KEY) throw new Error('OPENCAGE_KEY not found in .env');
 
-const CSV_PATH = '../eco_place.csv';
+const CSV_PATH = '../manual-dest.csv';
 const limit = pLimit(1);
 
 /* ------- helper DB ------- */
@@ -44,7 +44,7 @@ async function getOrInsertCityAndProvinceGeocoded(cityName) {
     "Jakarta": "DKI Jakarta",
     "West Java": "Jawa Barat",
     "Central Java": "Jawa Tengah",
-    "Special Region of Yogyakarta": "DI Yogyakarta",
+    "Special Region of Yogyakarta": "Daerah Istimewa Yogyakarta",
     "East Java": "Jawa Timur",
     "Bali": "Bali",
     "West Kalimantan": "Kalimantan Barat",
@@ -154,17 +154,12 @@ function importCSV() {
         try {
           const cityId = await getOrInsertCityAndProvinceGeocoded(place.city);
 
-          // Pakai geocoding
-          const { lat, lng } = await limit(() =>
-            geocodeLocation(`${place.place_name}, ${place.city}`)
-          );
-
           const destId = await insertDestination({
             id: Number(place.place_id),
             name: place.place_name,
             cityId,
-            lat,
-            lng,
+            lat: place.latitude,
+            lng: place.longitude,
             desc: place.place_description,
             mainPhoto: place.place_img,
           });

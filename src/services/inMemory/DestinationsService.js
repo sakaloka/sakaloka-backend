@@ -1,30 +1,53 @@
 import db from '../../db/database.js';
 import axios from 'axios';
-import moment from 'moment-timezone'
-
-const ML_BASE_URL = 'http://127.0.0.1:8000'; 
+import moment from 'moment-timezone';
+import dotenv from 'dotenv';
+dotenv.config();
 
 class DestinationsService {
-  getAllDestinations = () => {
-    const stmt = db.prepare('SELECT * FROM destinations');
-    return stmt.all();
+  getAllDestinations = async () => {
+    const [rows] = await db.execute(`
+      SELECT d.id, d.name, CONCAT(c.name, ', ', p.name) AS location, d.latitude, d.longitude, d.description FROM destinations d
+      JOIN cities c ON c.id = d.city_id
+      JOIN provinces p ON p.id = c.province_id
+      `);
+    return rows;
   };
 
-  getDestinationById = (id) => {
-    const stmt = db.prepare('SELECT * FROM destinations WHERE id = ?');
-    return stmt.get(id);
-  };
+  getDestinationById = async (id) => {
+    const [rows] = await db.execute(`
+      SELECT 
+        d.id,
+        d.name,
+        d.latitude,
+        d.longitude,
+        d.description,
+        CONCAT (c.name, ', ', p.name) AS location,
+        GROUP_CONCAT(DISTINCT cat.name) AS categories,
+        GROUP_CONCAT(DISTINCT dp.photo_url SEPARATOR ' || ') AS photo_urls
+      FROM destinations d
+      JOIN cities c ON c.id = d.city_id
+      JOIN provinces p ON p.id = c.province_id
+      LEFT JOIN destination_categories dc ON dc.destination_id = d.id
+      LEFT JOIN categories cat ON cat.id = dc.category_id
+      LEFT JOIN destination_photos dp ON dp.destination_id = d.id
+      WHERE d.id = ?
+      GROUP BY d.id
+    `, [id]);
+  
+    return rows[0];
+  };  
 
-  addDestination = ({ name, cityId, latitude, longitude, description }) => {
+  addDestination = async ({ name, cityId, latitude, longitude, description }) => {
     const timestamp = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
-    const stmt = db.prepare(`
+
+    const [result] = await db.execute(`
       INSERT INTO destinations (name, city_id, latitude, longitude, description, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `);
-    const result = stmt.run(name, cityId, latitude, longitude, description, timestamp, timestamp);
+    `, [name, cityId, latitude, longitude, description, timestamp, timestamp]);
 
     return {
-      id: result.lastInsertRowid,
+      id: result.insertId,
       name,
       city_id: cityId,
       latitude,
@@ -35,120 +58,102 @@ class DestinationsService {
     };
   };
 
-  updateDestination = (id, data) => {
+  updateDestination = async (id, data) => {
     const timestamp = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
-    const stmt = db.prepare(`
+
+    const [result] = await db.execute(`
       UPDATE destinations
       SET name = ?, city_id = ?, latitude = ?, longitude = ?, description = ?, updated_at = ?
       WHERE id = ?
-    `);
-    const result = stmt.run(
-      data.name,
-      data.city_id,
-      data.latitude,
-      data.longitude,
-      data.description,
-      timestamp,
-      id
-    );
+    `, [data.name, data.city_id, data.latitude, data.longitude, data.description, timestamp, id]);
 
-    return result.changes > 0;
+    return result.affectedRows > 0;
   };
 
-  deleteDestination = (id) => {
-    const stmt = db.prepare('DELETE FROM destinations WHERE id = ?');
-    const result = stmt.run(id);
-    return result.changes > 0;
+  deleteDestination = async (id) => {
+    const [result] = await db.execute('DELETE FROM destinations WHERE id = ?', [id]);
+    return result.affectedRows > 0;
   };
 
-  getDestinationByName = (name) => {
-    return db.prepare(`
-      SELECT d.*, c.name AS city, GROUP_CONCAT(cat.name, ', ') AS categories,
-        (SELECT photo_url
-          FROM destination_photos
-          WHERE destination_id = d.id
-          AND is_gallery = 0
-          LIMIT 1) AS main_photo
-      FROM destinations d
+  getDestinationByName = async (name) => {
+    const [rows] = await db.execute(`
+      SELECT 
+        d.id, 
+        d.name, 
+        d.latitude, 
+        d.longitude, 
+        d.description, 
+        CONCAT (c.name, ', ', p.name) AS location, 
+        (
+          SELECT GROUP_CONCAT(DISTINCT cat.name SEPARATOR ', ')
+              FROM destination_categories dc
+              JOIN categories cat ON cat.id = dc.category_id
+              WHERE dc.destination_id = 1
+          ) AS categories,
+        dp.photo_url AS main_photo
+      FROM destinations d 
       JOIN cities c ON d.city_id = c.id
-      JOIN destination_categories dc ON dc.destination_id = d.id
-      JOIN categories cat ON cat.id = dc.category_id
-      WHERE d.name = ? LIMIT 1
-    `).get(name);
+      JOIN provinces p ON c.province_id = p.id
+      JOIN destination_photos dp ON d.id = dp.destination_id 
+      where d.name = ? and dp.is_gallery = 0;
+    `, [name]);
+
+    return rows[0];
   };
 
-  // Categories
-  getCategories = () => {
-    const stmt = db.prepare(`
-      SELECT *
-      FROM categories
-    `);
-    return stmt.all(); 
-  };  
+  getCategories = async () => {
+    const [rows] = await db.execute('SELECT * FROM categories');
+    return rows;
+  };
 
-  postUserPreferences = ({ userId, preferences }) => {
-    const stmt = db.prepare(`
-      INSERT INTO user_preferences (user_id, preferences)
-      VALUES (?, ?)
-    `);
-  
-    const result = stmt.run(userId, preferences);
-    return result.changes;
-  };  
+  postUserPreferences = async ({ userId, preferences }) => {
+    const [result] = await db.execute(`
+      INSERT INTO user_preferences (user_id, preferences) VALUES (?, ?)
+    `, [userId, preferences]);
+    return result.affectedRows;
+  };
 
-  // Top
   getTopDestinations = async () => {
-    const stmt = db.prepare(`
-      SELECT d.id, d.name, c.name AS city, dp.photo_url, AVG(pr.predicted_rating) AS rating
+    const [rows] = await db.execute(`
+      SELECT 
+        d.id,
+        d.name,
+        CONCAT (c.name, ', ', p.name) AS location,
+        dp.photo_url AS photo,
+        AVG(pr.predicted_rating) AS rating
       FROM destinations d
       JOIN cities c ON d.city_id = c.id
-      JOIN destination_photos dp ON d.id = dp.destination_id
+      JOIN provinces p ON c.province_id = p.id
       JOIN predicted_reviews pr ON pr.destination_id = d.id
-      WHERE dp.is_gallery = 0
-        AND d.id IN (
-          SELECT destination_id
-          FROM predicted_reviews
-          GROUP BY destination_id
-          ORDER BY AVG(predicted_rating) DESC
-          LIMIT 5
-        )
+      JOIN destination_photos dp ON dp.destination_id = d.id AND dp.is_gallery = 0
       GROUP BY d.id, d.name, c.name, dp.photo_url
       ORDER BY rating DESC
+      LIMIT 5;
     `);
-  
-    return stmt.all();
-  }   
+    return rows;
+  };
 
-  getRecommendationsByPreferences = async (id) => {
-    const result = db.prepare(`
-      SELECT preferences 
-      FROM user_preferences 
-      WHERE user_id = ? 
-    `).get(id);
-    
-    const preferences = result?.preferences;
-    const { data } = await axios.post(`${ML_BASE_URL}/recommend/`, {
+  getRecommendationsByPreferences = async (userId) => {
+    const [rows] = await db.execute('SELECT preferences FROM user_preferences WHERE user_id = ?', [userId]);
+    const preferences = rows[0]?.preferences;
+    if (!preferences) return [];
+
+    const { data } = await axios.post(`${process.env.ML_BASE_URL}/recommend/`, {
       query: preferences,
       top_n: 5,
     });
 
-    const detailed = data.recommendations.map((rec) => {
-      const dest = this.getDestinationByName(rec.place_name);
-      if (!dest) return null; 
-      return {
-        id          : dest.id,
-        name        : dest.name,
-        city        : dest.city,
-        categories  : dest.categories,
-        latitude    : dest.latitude,
-        longitude   : dest.longitude,
-        description : dest.description,
-        main_photo  : dest.main_photo,
-        similarity  : rec.similarity_score,
-      };
-    }).filter(Boolean);       
+    const detailed = await Promise.all(data.recommendations.map(async (rec) => {
+      const dest = await this.getDestinationByName(rec.place_name);
+      if (!dest) return null;
 
-    return detailed;
+      return {
+        dest,
+        similarity: rec.similarity_score,
+      };
+    }));
+
+    return detailed.filter(Boolean);
   };
 }
 
