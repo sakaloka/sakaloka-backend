@@ -15,9 +15,10 @@ class EventsService {
 
   getEventById = async (id) => {
     const [rows] = await db.execute(`
-      SELECT e.*, c.name AS city 
+      SELECT e.id, e.title, CONCAT (c.name, ', ', p.name) AS location, e.category, e.start_date, e.end_date, e.description, e.detail_url
       FROM events e 
-      LEFT JOIN cities c ON e.city_id = c.id 
+      JOIN cities c ON e.city_id = c.id 
+      JOIN provinces p ON c.province_id = p.id
       WHERE e.id = ?
     `, [id]);
     return rows[0];
