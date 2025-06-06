@@ -159,7 +159,12 @@ class DestinationsService {
       if (!dest) return null;
 
       return {
-        dest,
+        id: dest.id,
+        name: dest.name,
+        location: dest.location,
+        latitude: dest.latitude,
+        longitude: dest.longitude,
+        description: dest.description,
         similarity: rec.similarity_score,
       };
     }));
