@@ -8,12 +8,15 @@ import events from './api/events/index.js';
 import EventsService from './services/inMemory/EventsService.js';
 import reviews from './api/reviews/index.js';
 import ReviewsService from './services/inMemory/ReviewsService.js';
+import bookmarks from './api/bookmarks/index.js';
+import BookmarksService from './services/inMemory/BookmarksService.js';
 
 const init = async () => {
   const usersService = new UsersService(); 
   const destinationsService = new DestinationsService(); 
   const eventsService = new EventsService(); 
   const reviewsService = new ReviewsService(); 
+  const bookmarksService = new BookmarksService();
 
   const server = Hapi.server({
     port: 9000,
@@ -49,6 +52,12 @@ const init = async () => {
       plugin: reviews,
       options: {
         service: reviewsService,
+      },
+    },
+    {
+      plugin: bookmarks,
+      options: {
+        service: bookmarksService,
       },
     },
   ]);

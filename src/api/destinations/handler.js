@@ -75,8 +75,15 @@ class DestinationsHandler {
   };  
 
   getDestinationByIdHandler = async (request, h) => {
+    const destinationId = request.params.id;
+    const { userId } = request.payload;
+
+    if (!userId) {
+      return h.response({ status: 'fail', message: 'Terjadi kesalahan saat mencari pengguna' }).code(400);
+    }
+
     try {
-      const data = await this._service.getDestinationById(request.params.id);
+      const data = await this._service.getDestinationById(destinationId, { userId });
       if (!data) {
         return h.response({ status: 'fail', message: 'Destinasi tidak ditemukan' }).code(404);
       }
@@ -85,7 +92,7 @@ class DestinationsHandler {
       console.error(err);
       return h.response({ status: 'error', message: 'Gagal mengambil destinasi' }).code(500);
     }
-  };  
+  };
 
   postDestinationHandler = (request, h) => {
     const { name, cityId, latitude, longitude, description } = request.payload;

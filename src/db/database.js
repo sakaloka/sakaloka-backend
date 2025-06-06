@@ -11,7 +11,8 @@ const db = await mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  dateStrings: true
+  dateStrings: true,
+  timezone: '+07:00'
 });
 
 export default db;

@@ -15,9 +15,21 @@ class EventsHandler {
   });
 
   getEventByIdHandler = async (request, h) => {
-    const data = await this._service.getEventById(request.params.id);
-    if (!data) return h.response({ status: 'fail', message: 'Event tidak ditemukan' }).code(404);
-    return { status: 'success', data };
+    const eventId = request.params.id;
+    const {userId} = request.payload;
+
+    if (!userId) {
+      return h.response({ status: 'fail', message: 'Terjadi kesalahan saat mencari pengguna' }).code(400);
+    }
+
+    try {
+      const data = await this._service.getEventById(eventId, { userId });
+      if (!data) return h.response({ status: 'fail', message: 'Event tidak ditemukan' }).code(404);
+      return { status: 'success', data };
+    } catch (err) {
+      console.error(err);
+      return h.response({ status: 'error', message: 'Gagal mengambil detail event' }).code(500);
+    }
   };
 
   postEventHandler = async (request, h) => {

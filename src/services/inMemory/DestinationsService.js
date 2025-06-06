@@ -25,7 +25,7 @@ class DestinationsService {
     return rows;
   };
 
-  getDestinationById = async (id) => {
+  getDestinationById = async (destinationId, {userId}) => {
     const [rows] = await db.execute(`
       SELECT 
         d.id,
@@ -35,16 +35,18 @@ class DestinationsService {
         d.description,
         CONCAT (c.name, ', ', p.name) AS location,
         GROUP_CONCAT(DISTINCT cat.name) AS categories,
-        GROUP_CONCAT(DISTINCT dp.photo_url SEPARATOR ' || ') AS photo_urls
+        GROUP_CONCAT(DISTINCT dp.photo_url SEPARATOR ' || ') AS photo_urls,
+        MAX(CASE WHEN ub.id IS NOT NULL THEN TRUE ELSE FALSE END) AS is_saved
       FROM destinations d
       JOIN cities c ON c.id = d.city_id
       JOIN provinces p ON p.id = c.province_id
       LEFT JOIN destination_categories dc ON dc.destination_id = d.id
       LEFT JOIN categories cat ON cat.id = dc.category_id
       LEFT JOIN destination_photos dp ON dp.destination_id = d.id
+      LEFT JOIN user_bookmark ub ON ub.destination_id = d.id AND ub.user_id = ? AND ub.type = 'Destinasi'
       WHERE d.id = ?
       GROUP BY d.id
-    `, [id]);
+    `, [userId, destinationId]);
   
     return rows[0];
   };  
