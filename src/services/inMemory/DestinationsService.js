@@ -7,9 +7,20 @@ dotenv.config();
 class DestinationsService {
   getAllDestinations = async () => {
     const [rows] = await db.execute(`
-      SELECT d.id, d.name, CONCAT(c.name, ', ', p.name) AS location, d.latitude, d.longitude, d.description FROM destinations d
+      SELECT 
+        d.id,
+        d.name,
+        d.latitude,
+        d.longitude,
+        d.description,
+        CONCAT (c.name, ', ', p.name) AS location,
+        GROUP_CONCAT(DISTINCT cat.name) AS categories
+      FROM destinations d
       JOIN cities c ON c.id = d.city_id
       JOIN provinces p ON p.id = c.province_id
+      LEFT JOIN destination_categories dc ON dc.destination_id = d.id
+      LEFT JOIN categories cat ON cat.id = dc.category_id
+      GROUP BY d.id
       `);
     return rows;
   };
