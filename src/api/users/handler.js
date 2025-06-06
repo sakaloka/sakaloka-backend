@@ -46,7 +46,7 @@ class UsersHandler {
     return h.response({
       status: 'success',
       message: 'Berhasil login',
-      data: {
+      loginResult: {
         userId: user.id,
         name: user.name,
         token,
