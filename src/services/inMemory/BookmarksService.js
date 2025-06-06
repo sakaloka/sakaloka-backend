@@ -7,6 +7,8 @@ class BookmarksService {
         ub.id,
         ub.user_id,
         ub.type,
+        ub.destination_id,
+        ub.event_id,
         CASE 
           WHEN ub.type = 'Acara Budaya' THEN e.title 
           ELSE d.name 
