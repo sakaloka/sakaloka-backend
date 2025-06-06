@@ -3,6 +3,8 @@ class BookmarksHandler {
     this._service = service;
 
     this.getBookmarksByUserHandler = this.getBookmarksByUserHandler.bind(this);
+    this.addBookmarkHandler = this.addBookmarkHandler.bind(this);
+    this.deleteBookmarkHandler = this.deleteBookmarkHandler.bind(this);
   }
 
   getBookmarksByUserHandler = async (request, h) => {

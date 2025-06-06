@@ -5,6 +5,7 @@ class BookmarksService {
     const [rows] = await db.execute(`
       SELECT 
         ub.id,
+        ub.user_id,
         ub.type,
         CASE 
           WHEN ub.type = 'Acara Budaya' THEN e.title 
