@@ -9,13 +9,11 @@ class EventsService {
       LEFT JOIN cities c ON e.city_id = c.id
       JOIN provinces p ON e.province_id = p.id
     `);
-    
+
     return rows.map(row => ({
       ...row,
       start_date: row.start_date?.toISOString().split('T')[0],
       end_date: row.end_date?.toISOString().split('T')[0],
-      created_at: row.created_at?.toISOString().split('T')[0],
-      updated_at: row.updated_at?.toISOString().split('T')[0]
     }));
   };
 
