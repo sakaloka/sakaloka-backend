@@ -21,6 +21,11 @@ const routes = (handler) => [
     path: '/users/{id}',
     handler: handler.putUserHandler,
   },
+  {
+    method: 'GET',
+    path: '/users/summary/{id}',
+    handler: handler.getUserSummaryHandler,
+  },
 ];
 
 export default routes;

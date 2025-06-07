@@ -88,6 +88,20 @@ class UsersHandler {
       data: updatedUser,
     };
   };
+
+  getUserSummaryHandler = async (request, h) => {
+    const { id } = request.params;
+    try {
+      const summary = await this._service.getUserSummary(id);
+      return h.response({
+        status: 'success',
+        message: 'Summary berhasil diambil',
+        data: summary,
+      }).code(201);
+    } catch (err) {
+      return h.response({ status: 'fail', message: 'Terjadi kesalahan saat mengambil data' }).code(500);
+    }
+  }
 }
 
 export default UsersHandler;

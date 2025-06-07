@@ -60,6 +60,21 @@ class UsersService {
     if (result.affectedRows === 0) return null;
     return this.findUserById(id);
   };
+
+  getUserSummary = async (id) => {
+    const [rows] = await db.execute(`
+      SELECT COUNT(ub.id) AS bookmark_total, 
+      (SELECT COUNT(e.id) FROM events e) AS event_total,
+      (SELECT COUNT(d.id) FROM destinations d) AS destination_total
+      FROM user_bookmark ub 
+      WHERE ub.user_id = ?
+      GROUP BY ub.user_id
+      `, [id]);
+    const user = rows[0];
+    if (!user) return null;
+
+    return user;
+  }
 }
 
 export default UsersService;
