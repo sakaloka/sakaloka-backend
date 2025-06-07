@@ -16,13 +16,13 @@ class BookmarksService {
         CASE 
           WHEN ub.type = 'Destinasi' THEN dp.photo_url
           ELSE NULL
-        END AS photo_url,
-        ub.created_at
+        END AS photo_url
       FROM user_bookmark ub
       LEFT JOIN events e ON ub.event_id = e.id
       LEFT JOIN destinations d ON ub.destination_id = d.id
       LEFT JOIN destination_photos dp ON d.id = dp.destination_id AND dp.is_gallery = 0
       WHERE ub.user_id = ?
+      ORDER BY ub.created_at DESC
     `, [id]);
   
     return rows;
