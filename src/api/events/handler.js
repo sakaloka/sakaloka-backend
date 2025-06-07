@@ -9,10 +9,23 @@ class EventsHandler {
     this.deleteEventHandler = this.deleteEventHandler.bind(this);
   }
 
-  getEventsHandler = async () => ({
-    status: 'success',
-    data: await this._service.getAllEvents()
-  });
+  getEventsHandler = async (request, h) => {
+    const { userId } = request.query;
+  
+    try {
+      const events = await this._service.getAllEvents(userId); 
+      return {
+        status: 'success',
+        data: events
+      };
+    } catch (err) {
+      console.error(err);
+      return h.response({
+        status: 'error',
+        message: 'Gagal mengambil data event'
+      }).code(500);
+    }
+  };  
 
   getEventByIdHandler = async (request, h) => {
     const eventId = request.params.id;

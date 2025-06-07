@@ -2,13 +2,25 @@ import db from '../../db/database.js';
 import moment from 'moment-timezone';
 
 class EventsService {
-  getAllEvents = async () => {
+  getAllEvents = async (userId) => {
     const [rows] = await db.execute(`
-      SELECT e.id, e.title, CONCAT (c.name, ', ', p.name) AS location, e.category, e.start_date, e.end_date, e.description, e.detail_url
+      SELECT 
+        e.id,
+        e.title,
+        CONCAT(c.name, ', ', p.name) AS location,
+        e.category,
+        e.start_date,
+        e.end_date,
+        e.description,
+        e.detail_url,
+        MAX(CASE WHEN ub.id IS NOT NULL THEN TRUE ELSE FALSE END) AS is_saved
       FROM events e 
       JOIN cities c ON e.city_id = c.id
       JOIN provinces p ON c.province_id = p.id
-    `);
+      LEFT JOIN user_bookmark ub ON ub.event_id = e.id AND ub.user_id = ? AND ub.type = 'Acara Budaya'
+      GROUP BY 
+        e.id, e.title, c.name, p.name, e.category, e.start_date, e.end_date, e.description, e.detail_url
+    `, [userId]);
 
     return rows;
   };
