@@ -36,6 +36,7 @@ class EventsService {
         e.end_date,
         e.description,
         e.detail_url,
+        (SELECT COUNT(*) FROM user_bookmark WHERE event_id = e.id AND type = 'Acara Budaya') AS bookmark_count,
         MAX(CASE WHEN ub.id IS NOT NULL THEN TRUE ELSE FALSE END) AS is_saved
       FROM events e
       JOIN cities c ON e.city_id = c.id

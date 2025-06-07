@@ -36,6 +36,7 @@ class DestinationsService {
         CONCAT (c.name, ', ', p.name) AS location,
         GROUP_CONCAT(DISTINCT cat.name) AS categories,
         GROUP_CONCAT(DISTINCT dp.photo_url SEPARATOR ' || ') AS photo_urls,
+        (SELECT COUNT(*) FROM user_bookmark WHERE destination_id = d.id AND type = 'Destinasi') AS bookmark_count,
         MAX(CASE WHEN ub.id IS NOT NULL THEN TRUE ELSE FALSE END) AS is_saved
       FROM destinations d
       JOIN cities c ON c.id = d.city_id

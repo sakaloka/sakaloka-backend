@@ -40,7 +40,7 @@ class BookmarksHandler {
       console.error(err);
       return h.response({ status: 'error', message: 'Gagal menghapus bookmark' }).code(500);
     }
-  }  
+  }     
 }
 
 export default BookmarksHandler;
