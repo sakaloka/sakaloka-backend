@@ -76,7 +76,7 @@ class DestinationsHandler {
 
   getDestinationByIdHandler = async (request, h) => {
     const destinationId = request.params.id;
-    const { userId } = request.payload;
+    const { userId } = request.query;
 
     if (!userId) {
       return h.response({ status: 'fail', message: 'Terjadi kesalahan saat mencari pengguna' }).code(400);

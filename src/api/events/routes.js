@@ -5,7 +5,7 @@ const routes = (handler) => [
     handler: handler.getEventsHandler 
   },
   { 
-    method: 'POST', 
+    method: 'GET', 
     path: '/events/{id}', 
     handler: handler.getEventByIdHandler 
   },

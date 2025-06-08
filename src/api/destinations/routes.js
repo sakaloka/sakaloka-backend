@@ -4,7 +4,7 @@ const routes = (handler) => [
     path: '/destinations', 
     handler: handler.getDestinationsHandler,
   },
-  { method: 'POST', 
+  { method: 'GET', 
     path: '/destinations/{id}', 
     handler: handler.getDestinationByIdHandler,
   },
