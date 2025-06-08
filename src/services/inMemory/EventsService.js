@@ -36,12 +36,15 @@ class EventsService {
         e.end_date,
         e.description,
         e.detail_url,
+        ROUND(AVG(r.rating), 1) AS rating_average,
+        COUNT(r.id) AS rating_count,
         (SELECT COUNT(*) FROM user_bookmark WHERE event_id = e.id AND type = 'Acara Budaya') AS bookmark_count,
         MAX(CASE WHEN ub.id IS NOT NULL THEN TRUE ELSE FALSE END) AS is_saved
       FROM events e
       JOIN cities c ON e.city_id = c.id
       JOIN provinces p ON c.province_id = p.id
       LEFT JOIN user_bookmark ub ON ub.event_id = e.id AND ub.user_id = ? AND ub.type = 'Acara Budaya'
+      LEFT JOIN reviews r ON r.event_id = e.id
       WHERE e.id = ?
       GROUP BY 
         e.id, e.title, c.name, p.name, e.category, e.start_date, e.end_date, e.description, e.detail_url

@@ -35,6 +35,8 @@ class DestinationsService {
         d.description,
         CONCAT (c.name, ', ', p.name) AS location,
         GROUP_CONCAT(DISTINCT cat.name) AS categories,
+        ROUND(AVG(r.rating), 1) AS rating_average,
+        COUNT(DISTINCT r.id) AS rating_count,
         GROUP_CONCAT(DISTINCT dp.photo_url SEPARATOR ' || ') AS photo_urls,
         (SELECT COUNT(*) FROM user_bookmark WHERE destination_id = d.id AND type = 'Destinasi') AS bookmark_count,
         MAX(CASE WHEN ub.id IS NOT NULL THEN TRUE ELSE FALSE END) AS is_saved
@@ -45,6 +47,7 @@ class DestinationsService {
       LEFT JOIN categories cat ON cat.id = dc.category_id
       LEFT JOIN destination_photos dp ON dp.destination_id = d.id
       LEFT JOIN user_bookmark ub ON ub.destination_id = d.id AND ub.user_id = ? AND ub.type = 'Destinasi'
+      LEFT JOIN reviews r ON r.destination_id = d.id
       WHERE d.id = ?
       GROUP BY d.id
     `, [userId, destinationId]);
