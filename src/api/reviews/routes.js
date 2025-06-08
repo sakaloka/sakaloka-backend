@@ -27,12 +27,7 @@ const routes = (handler) => [
   },
   {
     method: 'PUT',
-    path: '/reviews/events/{id}',
-    handler: handler.putReviewHandler,
-  },
-  {
-    method: 'PUT',
-    path: '/reviews/destinations/{id}',
+    path: '/reviews/{id}',
     handler: handler.putReviewHandler,
   },
   {

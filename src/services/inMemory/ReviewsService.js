@@ -1,3 +1,4 @@
+import moment from 'moment-timezone';
 import db from '../../db/database.js';
 
 class ReviewsService {
@@ -82,7 +83,7 @@ class ReviewsService {
   };
 
   updateReview = async (id, { comment, rating }) => {
-    const now = new Date();
+    const now = moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
 
     const [result] = await db.execute(
       `UPDATE reviews SET comment = ?, rating = ?, updated_at = ? WHERE id = ?`,
