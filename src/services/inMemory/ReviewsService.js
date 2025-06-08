@@ -32,9 +32,21 @@ class ReviewsService {
   getReviewsByTypeAndTarget = async (type, id) => {
     let query = '';
     if (type === 'event') {
-      query = `SELECT * FROM reviews WHERE event_id = ?`;
+      query = `
+        SELECT r.id, u.name, r.rating, r.comment, r.event_id  
+        FROM reviews r 
+        JOIN users u ON r.user_id = u.id
+        WHERE event_id = ?
+        ORDER BY r.created_at DESC
+      `;
     } else if (type === 'destination') {
-      query = `SELECT * FROM reviews WHERE destination_id = ?`;
+      query = `
+        SELECT r.id, u.name, r.rating, r.comment, r.destination_id  
+        FROM reviews r 
+        JOIN users u ON r.user_id = u.id
+        WHERE destination_id = ?
+        ORDER BY r.created_at DESC
+      `;
     } else {
       return [];
     }
