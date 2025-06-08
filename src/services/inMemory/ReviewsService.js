@@ -33,19 +33,19 @@ class ReviewsService {
     let query = '';
     if (type === 'event') {
       query = `
-        SELECT r.id, u.name, r.rating, r.comment, r.event_id  
+        SELECT r.id, u.name, r.rating, r.comment, r.event_id, r.updated_at
         FROM reviews r 
         JOIN users u ON r.user_id = u.id
         WHERE event_id = ?
-        ORDER BY r.created_at DESC
+        ORDER BY r.updated_at DESC
       `;
     } else if (type === 'destination') {
       query = `
-        SELECT r.id, u.name, r.rating, r.comment, r.destination_id  
+        SELECT r.id, u.name, r.rating, r.comment, r.destination_id, r.updated_at
         FROM reviews r 
         JOIN users u ON r.user_id = u.id
         WHERE destination_id = ?
-        ORDER BY r.created_at DESC
+        ORDER BY r.updated_at DESC
       `;
     } else {
       return [];

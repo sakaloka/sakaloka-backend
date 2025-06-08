@@ -35,7 +35,7 @@ class DestinationsService {
         d.description,
         CONCAT (c.name, ', ', p.name) AS location,
         GROUP_CONCAT(DISTINCT cat.name) AS categories,
-        ROUND(AVG(r.rating), 1) AS rating_average,
+        TRIM(TRAILING '.0' FROM ROUND(AVG(r.rating), 1)) AS rating_average,
         COUNT(DISTINCT r.id) AS rating_count,
         GROUP_CONCAT(DISTINCT dp.photo_url SEPARATOR ' || ') AS photo_urls,
         (SELECT COUNT(*) FROM user_bookmark WHERE destination_id = d.id AND type = 'Destinasi') AS bookmark_count,

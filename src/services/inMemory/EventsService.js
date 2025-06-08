@@ -36,7 +36,7 @@ class EventsService {
         e.end_date,
         e.description,
         e.detail_url,
-        ROUND(AVG(r.rating), 1) AS rating_average,
+        TRIM(TRAILING '.0' FROM ROUND(AVG(r.rating), 1)) AS rating_average,
         COUNT(r.id) AS rating_count,
         (SELECT COUNT(*) FROM user_bookmark WHERE event_id = e.id AND type = 'Acara Budaya') AS bookmark_count,
         MAX(CASE WHEN ub.id IS NOT NULL THEN TRUE ELSE FALSE END) AS is_saved
