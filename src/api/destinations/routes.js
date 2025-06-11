@@ -35,6 +35,11 @@ const routes = (handler) => [
     path: '/destinations/recommend/{id}',
     handler: handler.getRecommendationsByPreferencesHandler,
   },
+  {
+    method: 'GET',
+    path: '/destinations/recommend/rating/{id}',
+    handler: handler.getRecommendationsByRatingHandler,
+  },
   { method: 'GET', 
     path: '/destinations/top', 
     handler: handler.getTopDestinationsHandler,

@@ -177,6 +177,26 @@ class DestinationsService {
 
     return detailed.filter(Boolean);
   };
+
+  getRecommendationsByRating = async (userId) => {
+    const [historyRows] = await db.execute(`
+      SELECT destination_id AS place_id, rating
+      FROM reviews
+      WHERE user_id = ? AND destination_id IS NOT NULL
+    `, [userId]);
+  
+    if (!historyRows || historyRows.length === 0) return [];
+  
+    const payload = {
+      user_id: parseInt(userId),
+      history: historyRows,
+      top_k: 5,
+    };
+  
+    const a = await axios.post(`${process.env.ML_BASE_URL}/recommend/rating`, payload);
+  
+    return a.data.recommendations;
+  };  
 }
 
 export default DestinationsService;

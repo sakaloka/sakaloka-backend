@@ -14,6 +14,7 @@ class DestinationsHandler {
     this.getTopDestinationsHandler = this.getTopDestinationsHandler.bind(this);
     // Machine Learning
     this.getRecommendationsByPreferencesHandler = this.getRecommendationsByPreferencesHandler.bind(this);
+    this.getRecommendationsByRatingHandler = this.getRecommendationsByRatingHandler.bind(this);
   }
 
   getDestinationsHandler = async (request, h) => {
@@ -137,6 +138,16 @@ class DestinationsHandler {
   async getRecommendationsByPreferencesHandler(request, h) {
     try {
       const data = await this._service.getRecommendationsByPreferences(request.params.id);
+      return { status: 'success', data };
+    } catch (err) {
+      console.error(err);
+      return h.response({ status: 'error', message: 'Gagal mengambil rekomendasi' }).code(500);
+    }
+  }
+  
+  async getRecommendationsByRatingHandler(request, h) {
+    try {
+      const data = await this._service.getRecommendationsByRating(request.params.id);
       return { status: 'success', data };
     } catch (err) {
       console.error(err);
