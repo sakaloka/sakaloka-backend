@@ -72,9 +72,10 @@ class UsersService {
           FROM reviews r 
           WHERE r.user_id = ? AND r.destination_id IS NOT NULL
         ) AS rating_dest_count
-      FROM user_bookmark ub 
-      WHERE ub.user_id = ?
-      GROUP BY ub.user_id
+      FROM users u
+      LEFT JOIN user_bookmark ub ON u.id = ub.user_id
+      WHERE u.id = ?
+      GROUP BY u.id
     `, [id, id]);
     const user = rows[0];
     if (!user) return null;
