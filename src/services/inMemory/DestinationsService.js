@@ -155,7 +155,7 @@ class DestinationsService {
     const preferences = rows[0]?.preferences;
     if (!preferences) return [];
 
-    const { data } = await axios.post(`${process.env.ML_BASE_URL}/recommend/`, {
+    const { data } = await axios.post(`${process.env.ML_BASE_URL}/recommend`, {
       query: preferences,
       top_n: 5,
     });
