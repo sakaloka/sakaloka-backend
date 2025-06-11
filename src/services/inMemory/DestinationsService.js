@@ -202,10 +202,10 @@ class DestinationsService {
   
       return {
         id: dest.id,
+        name: dest.name,
         location: dest.location,
         categories: dest.categories,
-        photo_url: dest.photo_urls.split(' || ')[0],
-        score: rec.score,
+        photo_url: dest.photo_urls.split(' || ')[0]
       };
     }));
   
