@@ -193,10 +193,24 @@ class DestinationsService {
       top_k: 5,
     };
   
-    const a = await axios.post(`${process.env.ML_BASE_URL}/recommend/rating`, payload);
+    const { data } = await axios.post(`${process.env.ML_BASE_URL}/recommend/rating`, payload);
+    const recommendations = data.recommendations;
   
-    return a.data.recommendations;
-  };  
+    const detailed = await Promise.all(recommendations.map(async (rec) => {
+      const dest = await this.getDestinationById(rec.place_id, { userId });
+      if (!dest) return null;
+  
+      return {
+        id: dest.id,
+        location: dest.location,
+        categories: dest.categories,
+        photo_url: dest.photo_urls.split(' || ')[0],
+        score: rec.score,
+      };
+    }));
+  
+    return detailed.filter(Boolean);
+  };    
 }
 
 export default DestinationsService;
